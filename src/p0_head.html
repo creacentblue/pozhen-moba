@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="author" content="Faustus Studio · 浮士德工作室">
+<title>破阵之地 · 单人 MOBA</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
+html,body{width:100%;height:100%;background:#05090a;overflow:hidden;font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC","Source Han Sans SC",sans-serif;color:#e8e2d0}
+canvas{display:block;position:fixed;left:0;top:0;width:100%;height:100%;cursor:crosshair}
+.hide{display:none!important}
+.scr{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;background:radial-gradient(ellipse at 50% 30%,rgba(18,40,44,.92),rgba(3,8,9,.97) 75%);overflow:auto}
+.scr.clear{background:rgba(2,6,8,.72)}
+.wrap{width:min(1080px,96vw);padding:18px 10px;text-align:center}
+h1{font-family:"Noto Serif CJK SC","Songti SC","STKaiti","KaiTi",serif;font-size:60px;letter-spacing:.35em;color:#f1e6c4;text-shadow:0 0 22px rgba(230,170,70,.55),0 3px 0 #5a2a14;font-weight:900;padding-left:.35em}
+.sub{color:#9fb8ac;letter-spacing:.3em;font-size:14px;margin:4px 0 14px}
+.heroes{display:flex;gap:14px;justify-content:center;margin:8px 0}
+.card{flex:1;max-width:340px;border:1px solid #3d5a52;background:linear-gradient(180deg,rgba(30,50,50,.85),rgba(12,22,24,.9));border-radius:8px;padding:12px 12px 10px;cursor:pointer;text-align:left;transition:.15s;position:relative}
+.card:hover{border-color:#c9a45a;transform:translateY(-2px)}
+.card.sel{border-color:#f0c35a;box-shadow:0 0 22px rgba(240,195,90,.45),inset 0 0 20px rgba(240,195,90,.12)}
+.card .gl{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#10181a;float:left;margin-right:10px;font-family:"Noto Serif CJK SC","Songti SC",serif;box-shadow:0 0 14px currentColor}
+.card h3{font-size:19px;color:#f3e8c6}
+.card .ty{font-size:12px;color:#8fb0a4;margin-bottom:6px}
+.card p{font-size:12px;line-height:1.55;color:#c8d2c8;clear:both;margin-top:6px}
+.card .ab{font-size:12px;line-height:1.5;margin-top:4px;color:#d9d2b4}
+.card .ab b{display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;border-radius:3px;background:#c9a45a;color:#10181a;margin-right:5px;font-size:11px}
+.card .ab em{font-style:normal;color:#9db4aa}
+.row{display:flex;gap:26px;justify-content:center;align-items:center;margin:10px 0;flex-wrap:wrap;font-size:13px;color:#b8c8bc}
+.seg{display:inline-flex;border:1px solid #3d5a52;border-radius:5px;overflow:hidden;margin-left:8px}
+.seg span{padding:5px 13px;cursor:pointer;background:rgba(20,36,38,.8);border-right:1px solid #3d5a52;transition:.12s}
+.seg span:last-child{border:0}
+.seg span:hover{background:#2c4a46}
+.seg span.on{background:#c9a45a;color:#14201f;font-weight:700}
+.btn{display:inline-block;padding:11px 46px;margin:6px 8px;font-size:20px;letter-spacing:.25em;border:1px solid #c9a45a;border-radius:6px;background:linear-gradient(180deg,#7a3a1e,#4a1f12);color:#f6e8c0;cursor:pointer;transition:.12s;font-family:inherit;padding-left:calc(46px + .25em)}
+.btn:hover{filter:brightness(1.25);transform:translateY(-1px)}
+.btn.sm{font-size:15px;padding:8px 24px;letter-spacing:.15em}
+.help{font-size:12px;color:#8ea89c;line-height:1.8;margin-top:8px}
+.help b{color:#f0d28a;font-weight:600;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:3px;margin:0 2px}
+#shop{position:fixed;left:14px;top:60px;width:430px;max-height:calc(100% - 200px);overflow:auto;z-index:8;background:rgba(10,20,22,.95);border:1px solid #6d5a34;border-radius:8px;padding:10px 12px;box-shadow:0 6px 30px rgba(0,0,0,.6)}
+#shop h4{display:flex;justify-content:space-between;color:#f0d28a;font-size:15px;margin-bottom:6px}
+#shop .tip{font-size:11px;color:#9bb;margin-bottom:6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.it{border:1px solid #38524c;border-radius:5px;padding:5px 7px;cursor:pointer;background:rgba(24,40,42,.9);font-size:12px;display:flex;gap:7px;align-items:center}
+.it:hover{border-color:#f0c35a;background:#26403f}
+.it.no{opacity:.45}
+.it i{font-style:normal;width:30px;height:30px;flex:none;border-radius:5px;background:#c9a45a;color:#14201f;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px}
+.it div small{display:block;color:#9fb8ac;font-size:11px}
+.it .c{color:#f3cf5e;font-weight:700}
+#own{display:flex;gap:6px;margin:6px 0 8px;flex-wrap:wrap}
+#own .it{width:62px;height:40px;justify-content:center;padding:2px;cursor:pointer}
+#own .it i{width:100%;height:100%;background:#26403f;color:#e8d9a0}
+.panel{text-align:center;background:rgba(10,22,24,.94);border:1px solid #6d5a34;border-radius:10px;padding:22px 30px;min-width:360px;box-shadow:0 8px 40px #000}
+.panel h2{font-size:46px;letter-spacing:.4em;padding-left:.4em;font-family:"Noto Serif CJK SC","Songti SC",serif;margin-bottom:6px}
+table{border-collapse:collapse;margin:12px auto;font-size:13px}
+th,td{padding:5px 12px;border-bottom:1px solid #2c403d}
+th{color:#9cb;font-weight:500}
+td.b{color:#7fd0e8}td.r{color:#f09078}
+.credit{margin-top:14px;color:#c9b896;letter-spacing:.22em;font-size:13px;font-family:"Noto Serif CJK SC","Songti SC","STKaiti","KaiTi",serif}
+.credit small{display:block;margin-top:3px;letter-spacing:.16em;font-size:11px;color:#7e9890;font-family:inherit}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="menu" class="scr"><div class="wrap">
+  <h1>破阵之地</h1>
+  <div class="sub">单人 · 二对二 · 推塔夺城</div>
+  <div class="heroes" id="heroes"></div>
+  <div class="row">
+    <span>难度<span class="seg" id="segDiff"><span data-v="0">简单</span><span data-v="1" class="on">普通</span><span data-v="2">困难</span></span></span>
+    <span>游戏速度<span class="seg" id="segSpeed"><span data-v="1" class="on">×1</span><span data-v="1.5">×1.5</span><span data-v="2">×2</span></span></span>
+    <span>自动加点<span class="seg" id="segAuto"><span data-v="1" class="on">开</span><span data-v="0">关</span></span></span>
+  </div>
+  <div class="btn" id="btnStart">出　征</div>
+  <div class="help">
+    <b>右键</b>移动 / 点敌人攻击　<b>Q W E R</b>朝鼠标施法　<b>A</b>+左键 攻击移动　<b>S</b>停止　<b>B</b>回城　<b>P</b>商店（基地内购买）　<b>1</b>喝药<br>
+    <b>空格</b>回正镜头　<b>Shift+QWER</b>（或 Ctrl）升级技能　<b>小地图</b>左键移镜头 / 右键移动　<b>F</b>切换速度　<b>Esc</b>暂停　<b>M</b>静音　<b>摧毁敌方「龙脉晶」获胜</b>
+  </div>
+  <div class="credit">浮士德工作室 出品<small>Faustus Studio</small></div>
+</div></div>
+<div id="shop" class="hide"></div>
+<div id="pause" class="scr clear hide"><div class="panel"><h2>暂停</h2>
+  <div><div class="btn sm" id="bResume">继续</div><div class="btn sm" id="bRestart">重开本局</div><div class="btn sm" id="bMenu">返回选将</div></div>
+  <div class="help" style="margin-top:12px">右键移动/攻击 · QWER施法 · A+左键攻击移动 · B回城 · P商店 · 1喝药 · 空格回正镜头 · M静音 · F切换速度</div></div></div>
+<div id="result" class="scr clear hide"><div class="panel" id="resBox"></div></div>
+<script>
